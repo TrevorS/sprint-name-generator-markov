@@ -1,0 +1,2 @@
+%{"bunt": {:hex, :bunt, "0.2.0", "951c6e801e8b1d2cbe58ebbd3e616a869061ddadcc4863d0a2182541acae9a38", [:mix], [], "hexpm"},
+  "credo": {:hex, :credo, "0.8.2", "aa410c8f27c5fab00cab24f8477782bde9100b73d31debdce46625f097cc0e32", [:mix], [{:bunt, "~> 0.2.0", [hex: :bunt, repo: "hexpm", optional: false]}], "hexpm"}}
