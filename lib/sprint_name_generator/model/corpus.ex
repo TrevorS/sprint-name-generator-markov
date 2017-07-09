@@ -4,6 +4,8 @@ defmodule SprintNameGenerator.Model.Corpus do
   schema "corpora" do
     field :name, :string
     field :text, :string
-    field :markov, {:map, :string}
+    field :markov, :map
+
+    timestamps()
   end
 end
