@@ -1,7 +1,12 @@
 defmodule Markov do
-  def generate_sentence(dictionary, word_count) do
+  @defaults %{word_count: 5, starting_words: []}
+
+  def generate_sentence(dictionary, opts \\ []) do
+    word_count = Keyword.get(opts, :word_count, @defaults.word_count)
+    starting_words = Keyword.get(opts, :starting_words, @defaults.starting_words)
+
     sentence =
-      Enum.reduce 1..word_count, [], fn(_, words) ->
+      Enum.reduce 1..word_count, starting_words, fn(_, words) ->
         word =
           words
           |> previous_word
