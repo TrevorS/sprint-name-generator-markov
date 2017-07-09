@@ -11,12 +11,17 @@ defmodule SprintNameGenerator.Mixfile do
   end
 
   def application do
-    [extra_applications: [:logger]]
+    [
+      extra_applications: [:logger, :ecto, :postgrex],
+      mod: {SprintNameGenerator.Application, []}
+    ]
   end
 
   defp deps do
     [
-      {:credo, "~> 0.8", only: [:dev, :test], runtime: false}
+      {:credo, "~> 0.8", only: [:dev, :test], runtime: false},
+      {:postgrex, ">= 0.13.3"},
+      {:ecto, "~> 2.1"}
     ]
   end
 end
