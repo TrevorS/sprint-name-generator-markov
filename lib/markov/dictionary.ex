@@ -1,5 +1,5 @@
 defmodule Markov.Dictionary do
-  @split_regex ~r/\s+|\.|\?|\!|'|"|,|;|:|-/
+  @split_regex ~r/\s+|\.|\?|\!|"|,|;|:|-+/
   @enforce_keys [:text, :markov]
 
   defstruct [:name, :text, :markov]
