@@ -3,13 +3,13 @@ defmodule SprintNameGenerator.Repo.Migrations.AddCorporaTable do
 
   def change do
     create table(:corpora) do
-      add :name, :text
-      add :text, :text
-      add :markov, :map
+      add :name, :text, null: false
+      add :text, :text, null: false
+      add :markov, :map, null: false
 
       timestamps()
     end
 
-    create index(:corpora, [:name])
+    create index(:corpora, [:name], unique: true)
   end
 end
