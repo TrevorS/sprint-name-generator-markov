@@ -21,7 +21,8 @@ defmodule SprintNameGenerator.Mixfile do
     [
       {:credo, "~> 0.8", only: [:dev, :test], runtime: false},
       {:postgrex, ">= 0.13.3"},
-      {:ecto, "~> 2.1"}
+      {:ecto, "~> 2.1"},
+      {:poison, "~> 3.1"}
     ]
   end
 end
