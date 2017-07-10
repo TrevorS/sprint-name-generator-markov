@@ -4,7 +4,7 @@ defmodule SprintNameGenerator.Endpoint.Corpora do
   alias SprintNameGenerator.Response
   alias SprintNameGenerator.Response.Corpora
 
-  def init(options \\ []), do: options
+  def init(opts \\ []), do: opts
 
   def call(%{method: "GET", path_params: %{"id" => id}} = conn, _opts) do
     %Response{status_code: status_code, message: message} = Corpora.build(id)

@@ -4,14 +4,21 @@ defmodule SprintNameGenerator.Router do
   alias SprintNameGenerator.Response
   alias SprintNameGenerator.Response.NotFound
   alias SprintNameGenerator.Endpoint.Corpora
+  alias SprintNameGenerator.Endpoint.SprintName
 
   plug :set_response_content_type
 
   plug :match
   plug :dispatch
 
-  forward "/corpora/:id", to: Corpora
-  forward "/corpora", to: Corpora
+  forward "/corpora/:id/sprint-name",
+    to: SprintName
+
+  forward "/corpora/:id",
+    to: Corpora
+
+  forward "/corpora",
+    to: Corpora
 
   match _ do
     %Response{status_code: status_code, message: message} = NotFound.build()
