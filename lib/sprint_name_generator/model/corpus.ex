@@ -14,6 +14,10 @@ defmodule SprintNameGenerator.Model.Corpus do
     timestamps()
   end
 
+  def find_by_id(id) do
+    from Corpus, where: [id: ^id]
+  end
+
   def find_by_name(name) do
     from Corpus, where: [name: ^name]
   end

@@ -24,8 +24,6 @@ dictionary = Dictionary.new(love_sonet_18, name: "Love Sonet 18")
 
 Repo.delete_all(Corpus)
 
-Repo.insert! %Corpus{
-  name: dictionary.name,
-  text: dictionary.text,
-  markov: dictionary.markov
-}
+dictionary
+|> Corpus.from
+|> Repo.insert!

@@ -1,6 +1,11 @@
 defmodule SprintNameGenerator.Endpoint do
   use Plug.Router
 
+  alias Plug.Adapters.Cowboy
+
+  alias SprintNameGenerator.Response
+  alias SprintNameGenerator.Response.NotFound
+
   @opts [port: System.get_env("PORT") || 4000]
 
   plug Plug.Static,
@@ -17,10 +22,12 @@ defmodule SprintNameGenerator.Endpoint do
   plug SprintNameGenerator.Router
 
   match _ do
-    send_resp(conn, 404, "Not Found")
+    %Response{status_code: status_code, message: message} = NotFound.build()
+
+    send_resp(conn, status_code, message)
   end
 
   def child_spec do
-    Plug.Adapters.Cowboy.child_spec(:http, __MODULE__, [], @opts)
+    Cowboy.child_spec(:http, __MODULE__, [], @opts)
   end
 end
