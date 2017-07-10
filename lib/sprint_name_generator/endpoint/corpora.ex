@@ -19,7 +19,8 @@ defmodule SprintNameGenerator.Endpoint.Corpora do
   end
 
   def call(%{method: "POST", body_params: %{"corpus" => corpus}} = conn, _opts) do
-    %Response{status_code: status_code, message: message} = Corpora.build(corpus)
+    %Response{status_code: status_code, message: message} =
+      Corpora.build(corpus)
 
     send_resp(conn, status_code, message)
   end
