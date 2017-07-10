@@ -6,6 +6,7 @@ defmodule SprintNameGenerator.Application do
 
     children = [
       supervisor(SprintNameGenerator.Repo, []),
+      SprintNameGenerator.Endpoint.child_spec()
     ]
 
     opts = [strategy: :one_for_one, name: SprintNameGenerator.Supervisor]

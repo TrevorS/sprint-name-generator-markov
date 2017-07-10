@@ -12,7 +12,7 @@ defmodule SprintNameGenerator.Mixfile do
 
   def application do
     [
-      extra_applications: [:logger, :ecto, :postgrex],
+      extra_applications: [:logger, :ecto, :postgrex, :cowboy, :plug],
       mod: {SprintNameGenerator.Application, []}
     ]
   end
@@ -20,9 +20,11 @@ defmodule SprintNameGenerator.Mixfile do
   defp deps do
     [
       {:credo, "~> 0.8", only: [:dev, :test], runtime: false},
-      {:postgrex, ">= 0.13.3"},
+      {:postgrex, "~> 0.13"},
       {:ecto, "~> 2.1"},
-      {:poison, "~> 3.1"}
+      {:poison, "~> 3.1"},
+      {:cowboy, "~> 1.1"},
+      {:plug, "~> 1.3"}
     ]
   end
 end
