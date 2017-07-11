@@ -24,3 +24,9 @@ elm-stuff
 
 # elm-repl generated files
 repl-temp-*
+
+# js
+node_modules
+
+# compiled elm assets
+priv/static/index.html
