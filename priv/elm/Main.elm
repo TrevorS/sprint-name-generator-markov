@@ -1,5 +1,7 @@
 import Html exposing (Html, button, div, text)
 import Html.Events exposing (onClick)
+import Http
+import Json.Decode as Decode
 
 main : Program Never Model Msg
 main =
@@ -27,23 +29,39 @@ model =
   { sprintName = [] }
 
 -- UPDATE
-type Msg = GetSprintName | ClearSprintName
+type Msg
+  = GetSprintName
+  | ClearSprintName
+  | NewSprintName (Result Http.Error (List String))
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
     GetSprintName ->
       let
-        newState =
-          { model | sprintName = ["did", "it"] }
+        newState = model
 
       in
-        (newState, Cmd.none)
+        (newState, getSprintName)
 
     ClearSprintName ->
       let
         newState =
           { model | sprintName = [] }
+
+      in
+        (newState, Cmd.none)
+
+    NewSprintName (Ok newSprintName) ->
+      let newState =
+        { model | sprintName = newSprintName }
+
+      in
+        (newState, Cmd.none)
+
+    NewSprintName (Err _) ->
+      let newState =
+        { model | sprintName = ["Error"] }
 
       in
         (newState, Cmd.none)
@@ -63,4 +81,12 @@ subscriptions model = Sub.none
 
 -- HTTP
 getSprintName : Cmd Msg
-getSprintName = Cmd.none
+getSprintName =
+  let url =
+    "http://localhost:4000/corpora/3/sprint-name"
+  in
+    Http.send NewSprintName (Http.get url decodeSprintName)
+
+decodeSprintName : Decode.Decoder (List String)
+decodeSprintName =
+  Decode.list Decode.string
