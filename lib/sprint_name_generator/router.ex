@@ -6,6 +6,8 @@ defmodule SprintNameGenerator.Router do
   alias SprintNameGenerator.Endpoint.Corpora
   alias SprintNameGenerator.Endpoint.SprintName
 
+  plug Corsica, origins: "*"
+
   plug :set_response_content_type
 
   plug :match
