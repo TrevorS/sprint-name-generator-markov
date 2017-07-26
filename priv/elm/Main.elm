@@ -32,39 +32,22 @@ model =
 type Msg
   = GetSprintName
   | ClearSprintName
-  | NewSprintName (Result Http.Error (List String))
+  | NewSprintName (Result Http.Error Model)
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
     GetSprintName ->
-      let
-        newState = model
-
-      in
-        (newState, getSprintName)
+      (model, getSprintName)
 
     ClearSprintName ->
-      let
-        newState =
-          { model | sprintName = [] }
-
-      in
-        (newState, Cmd.none)
+      (Model [], Cmd.none)
 
     NewSprintName (Ok newSprintName) ->
-      let newState =
-        { model | sprintName = newSprintName }
-
-      in
-        (newState, Cmd.none)
+      (newSprintName, Cmd.none)
 
     NewSprintName (Err _) ->
-      let newState =
-        { model | sprintName = ["Error"] }
-
-      in
-        (newState, Cmd.none)
+      (Model ["Error"], Cmd.none)
 
 -- VIEW
 view : Model -> Html Msg
@@ -87,6 +70,8 @@ getSprintName =
   in
     Http.send NewSprintName (Http.get url decodeSprintName)
 
-decodeSprintName : Decode.Decoder (List String)
+decodeSprintName : Decode.Decoder Model
 decodeSprintName =
-  Decode.list Decode.string
+  Decode.map
+    Model
+    (Decode.at ["sprint_name"] (Decode.list Decode.string))
