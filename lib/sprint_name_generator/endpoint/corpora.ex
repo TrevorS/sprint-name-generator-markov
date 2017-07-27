@@ -3,6 +3,7 @@ defmodule SprintNameGenerator.Endpoint.Corpora do
 
   alias SprintNameGenerator.Response
   alias SprintNameGenerator.Response.Corpora
+  alias SprintNameGenerator.Response.NotFound
 
   def init(opts \\ []), do: opts
 
@@ -21,6 +22,12 @@ defmodule SprintNameGenerator.Endpoint.Corpora do
   def call(%{method: "POST", body_params: %{"corpus" => corpus}} = conn, _opts) do
     %Response{status_code: status_code, message: message} =
       Corpora.build(corpus)
+
+    send_resp(conn, status_code, message)
+  end
+
+  def call(conn, _opts) do
+    %Response{status_code: status_code, message: message} = NotFound.build()
 
     send_resp(conn, status_code, message)
   end

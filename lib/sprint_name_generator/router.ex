@@ -6,7 +6,10 @@ defmodule SprintNameGenerator.Router do
   alias SprintNameGenerator.Endpoint.Corpora
   alias SprintNameGenerator.Endpoint.SprintName
 
-  plug Corsica, origins: "*"
+  plug Corsica,
+    origins: "http://localhost:8000",
+    allow_headers: ["Content-Type"],
+    allow_credentials: true
 
   plug :set_response_content_type
 
