@@ -1,4 +1,4 @@
-import Html exposing (Html, button, div, input, text, ul, li)
+import Html exposing (Html, button, div, input, text, ul, li, span)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Http
@@ -17,23 +17,29 @@ main =
 -- INIT
 init : (Model, Cmd Msg)
 init =
-  ( Model [] "" ""
+  ( model
   , getSprintName
   )
 
 -- MODEL
+type alias Corpus =
+  { id: Maybe Int
+  , name: String
+  , text: String
+  }
+
+type alias Corpora = List Corpus
+
 type alias Model =
   { sprintName : List String
-  , newCorpusName : String
-  , newCorpusText : String
+  , newCorpus : Corpus
+  , corpora: Corpora
+  , errorMessage: String
   }
 
 model : Model
 model =
-  { sprintName = []
-  , newCorpusName = ""
-  , newCorpusText = ""
-  }
+  Model [] (Corpus Nothing "" "") [] ""
 
 -- UPDATE
 type Msg
@@ -43,7 +49,7 @@ type Msg
   | ChangeNewCorpusTextInput String
   | ChangeNewCorpusNameInput String
   | SubmitCorpus
-  | NewCorpus (Result Http.Error SubmitResponseResults)
+  | NewCorpus (Result Http.Error Corpus)
   | ClearCorpus
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -67,18 +73,36 @@ update msg model =
         (newModel, Cmd.none)
 
     NewSprintName (Err _) ->
-      (Model ["Error"] "" "", Cmd.none)
+      let newModel =
+        { model | errorMessage = "Error" }
+
+      in
+        (newModel, Cmd.none)
 
     ChangeNewCorpusTextInput inputText ->
-      let newModel =
-        { model | newCorpusText = inputText }
+      let
+        corpus =
+          model.newCorpus
+
+        newCorpus =
+          { corpus | text = inputText }
+
+        newModel =
+        { model | newCorpus = newCorpus }
 
       in
         (newModel, Cmd.none)
 
     ChangeNewCorpusNameInput inputText ->
-      let newModel =
-        { model | newCorpusName = inputText }
+      let
+        corpus =
+          model.newCorpus
+
+        newCorpus =
+          { corpus | name = inputText }
+
+        newModel =
+        { model | newCorpus = newCorpus }
 
       in
         (newModel, Cmd.none)
@@ -88,15 +112,17 @@ update msg model =
 
     ClearCorpus ->
       let newModel =
-        { model | newCorpusName = "", newCorpusText = "" }
+        { model | newCorpus = Corpus Nothing "" ""}
 
       in
         (newModel, Cmd.none)
 
     NewCorpus (Ok results) ->
-      Debug.crash("results: " ++ (toString results))
+      let newModel =
+        { model | corpora = results :: model.corpora }
 
-      (model, Cmd.none)
+      in
+        (newModel, Cmd.none)
 
     NewCorpus (Err error) ->
       Debug.crash("error: " ++ (toString error))
@@ -112,6 +138,7 @@ view model =
     , viewNewCorpusNameInput
     , viewNewCorpusTextInput
     , viewNewCorpusSubmitButtons
+    , viewErrors model
     ]
 
 viewSprintName : Model -> Html Msg
@@ -154,11 +181,12 @@ viewNewCorpusSubmitButtons =
     , button [ onClick ClearCorpus ] [ text "Clear Corpus" ]
     ]
 
+viewErrors : Model -> Html Msg
+viewErrors model =
+  div [] [ text model.errorMessage ]
+
 -- DECODERS
 type alias GetSprintNameResults =
-  { sprint_name : List String }
-
-type alias SubmitResponseResults =
   { sprint_name : List String }
 
 decodeSprintName : Decode.Decoder GetSprintNameResults
@@ -170,15 +198,21 @@ decodeSprintName =
 encodeCorpus : Model -> Http.Body
 encodeCorpus model =
   Http.jsonBody
-    <| Encode.object [ ("text", Encode.string model.newCorpusText)
-                     , ("name", Encode.string model.newCorpusName)
-                     ]
+    <| Encode.object
+      [
+        ("corpus", Encode.object
+          [ ("text", Encode.string model.newCorpus.text)
+          , ("name", Encode.string model.newCorpus.name)
+          ]
+        )
+      ]
 
-decodeSubmitResponse : Decode.Decoder SubmitResponseResults
+decodeSubmitResponse : Decode.Decoder Corpus
 decodeSubmitResponse =
-  Decode.map
-    SubmitResponseResults
-    (Decode.at ["sprint_name"] (Decode.list Decode.string))
+  Decode.map3 Corpus
+    (Decode.maybe <| Decode.field "id" Decode.int)
+    (Decode.field "name" Decode.string)
+    (Decode.field "text" Decode.string)
 
 -- HTTP
 getSprintName : Cmd Msg
