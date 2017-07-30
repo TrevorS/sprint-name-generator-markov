@@ -18,7 +18,7 @@ main =
 init : (Model, Cmd Msg)
 init =
   ( model
-  , getSprintName
+  , Cmd.batch([getSprintName, getCorpora])
   )
 
 -- MODEL
@@ -44,6 +44,7 @@ model =
 -- UPDATE
 type Msg
   = GetSprintName
+  | GetCorpora (Result Http.Error Corpora)
   | ClearSprintName
   | NewSprintName (Result Http.Error GetSprintNameResults)
   | ChangeNewCorpusTextInput String
@@ -72,9 +73,23 @@ update msg model =
       in
         (newModel, Cmd.none)
 
+    GetCorpora (Ok results) ->
+      let newModel =
+        { model | corpora = results }
+
+      in
+        (newModel, Cmd.none)
+
+    GetCorpora (Err _) ->
+      let newModel =
+        { model | errorMessage = "GetCorpora: Error" }
+
+      in
+        (newModel, Cmd.none)
+
     NewSprintName (Err _) ->
       let newModel =
-        { model | errorMessage = "Error" }
+        { model | errorMessage = "NewSprintName: Error" }
 
       in
         (newModel, Cmd.none)
@@ -207,12 +222,16 @@ encodeCorpus model =
         )
       ]
 
-decodeSubmitResponse : Decode.Decoder Corpus
-decodeSubmitResponse =
+decodeCorpus : Decode.Decoder Corpus
+decodeCorpus =
   Decode.map3 Corpus
     (Decode.maybe <| Decode.field "id" Decode.int)
     (Decode.field "name" Decode.string)
     (Decode.field "text" Decode.string)
+
+decodeCorpora : Decode.Decoder Corpora
+decodeCorpora =
+  Decode.list decodeCorpus
 
 -- HTTP
 getSprintName : Cmd Msg
@@ -222,9 +241,16 @@ getSprintName =
   in
     Http.send NewSprintName (Http.get url decodeSprintName)
 
+getCorpora : Cmd Msg
+getCorpora =
+  let url =
+    "http://localhost:4000/corpora"
+  in
+    Http.send GetCorpora (Http.get url decodeCorpora)
+
 submitCorpus : Model -> Cmd Msg
 submitCorpus model =
   let url =
     "http://localhost:4000/corpora"
   in
-    Http.send NewCorpus (Http.post url (encodeCorpus model) decodeSubmitResponse)
+    Http.send NewCorpus (Http.post url (encodeCorpus model) decodeCorpus)
