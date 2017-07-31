@@ -1,4 +1,4 @@
-import Html exposing (Html, button, div, input, text, ul, li, span)
+import Html exposing (Html, button, div, input, select, option, text, label, ul, li, span)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Http
@@ -34,17 +34,19 @@ type alias Model =
   { sprintName : List String
   , newCorpus : Corpus
   , corpora: Corpora
+  , selectedCorpus: String
   , errorMessage: String
   }
 
 model : Model
 model =
-  Model [] (Corpus Nothing "" "") [] ""
+  Model [] (Corpus Nothing "" "") [] "" ""
 
 -- UPDATE
 type Msg
   = GetSprintName
   | GetCorpora (Result Http.Error Corpora)
+  | ChooseCorpora String
   | ClearSprintName
   | NewSprintName (Result Http.Error GetSprintNameResults)
   | ChangeNewCorpusTextInput String
@@ -62,6 +64,13 @@ update msg model =
     ClearSprintName ->
       let newModel =
         { model | sprintName = [] }
+
+      in
+        (newModel, Cmd.none)
+
+    ChooseCorpora results ->
+      let newModel =
+        { model | selectedCorpus = results }
 
       in
         (newModel, Cmd.none)
@@ -150,6 +159,7 @@ view model =
   div []
     [ viewSprintName model
     , viewSprintNameButtons
+    , viewCorpora model
     , viewNewCorpusNameInput
     , viewNewCorpusTextInput
     , viewNewCorpusSubmitButtons
@@ -168,6 +178,20 @@ viewSprintNameButtons =
     [ button [ onClick GetSprintName ] [ text "Get Sprint Name" ]
     , button [ onClick ClearSprintName ] [ text "Clear" ]
     ]
+
+viewCorpora : Model -> Html Msg
+viewCorpora model =
+  div []
+    [ label []
+      [ select [ onInput ChooseCorpora ] (viewSelectCorpora model)
+      , text "Choose Corpora"
+      ]
+    ]
+
+viewSelectCorpora : Model -> List (Html Msg)
+viewSelectCorpora model =
+  (List.map (\corpora -> option [value (toString corpora.id)] [text corpora.name])
+    model.corpora)
 
 viewNewCorpusNameInput : Html Msg
 viewNewCorpusNameInput =
