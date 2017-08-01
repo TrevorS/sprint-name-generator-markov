@@ -2,8 +2,12 @@ import Html exposing (Html, button, div, input, select, option, text, label, ul,
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Http
-import Json.Decode as Decode
-import Json.Encode as Encode
+
+import Corpus exposing (Corpus)
+import Corpora exposing (Corpora)
+import SelectCorpora exposing (selectCorpora)
+import Msgs exposing (Msg)
+import Decoders exposing (..)
 
 main : Program Never Model Msg
 main =
@@ -22,14 +26,6 @@ init =
   )
 
 -- MODEL
-type alias Corpus =
-  { id: Maybe Int
-  , name: String
-  , text: String
-  }
-
-type alias Corpora = List Corpus
-
 type alias Model =
   { sprintName : List String
   , newCorpus : Corpus
@@ -43,67 +39,55 @@ model =
   Model [] (Corpus Nothing "" "") [] "" ""
 
 -- UPDATE
-type Msg
-  = GetSprintName
-  | GetCorpora (Result Http.Error Corpora)
-  | ChooseCorpora String
-  | ClearSprintName
-  | NewSprintName (Result Http.Error GetSprintNameResults)
-  | ChangeNewCorpusTextInput String
-  | ChangeNewCorpusNameInput String
-  | SubmitCorpus
-  | NewCorpus (Result Http.Error Corpus)
-  | ClearCorpus
-
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    GetSprintName ->
+    Msgs.GetSprintName ->
       (model, getSprintName)
 
-    ClearSprintName ->
+    Msgs.ClearSprintName ->
       let newModel =
         { model | sprintName = [] }
 
       in
         (newModel, Cmd.none)
 
-    ChooseCorpora results ->
+    Msgs.CorporaSelected results ->
       let newModel =
         { model | selectedCorpus = results }
 
       in
         (newModel, Cmd.none)
 
-    NewSprintName (Ok results) ->
+    Msgs.NewSprintName (Ok results) ->
       let newModel =
         { model | sprintName = results.sprint_name }
 
       in
         (newModel, Cmd.none)
 
-    GetCorpora (Ok results) ->
+    Msgs.GetCorpora (Ok results) ->
       let newModel =
         { model | corpora = results }
 
       in
         (newModel, Cmd.none)
 
-    GetCorpora (Err _) ->
+    Msgs.GetCorpora (Err _) ->
       let newModel =
         { model | errorMessage = "GetCorpora: Error" }
 
       in
         (newModel, Cmd.none)
 
-    NewSprintName (Err _) ->
+    Msgs.NewSprintName (Err _) ->
       let newModel =
         { model | errorMessage = "NewSprintName: Error" }
 
       in
         (newModel, Cmd.none)
 
-    ChangeNewCorpusTextInput inputText ->
+    Msgs.ChangeNewCorpusTextInput inputText ->
       let
         corpus =
           model.newCorpus
@@ -117,7 +101,7 @@ update msg model =
       in
         (newModel, Cmd.none)
 
-    ChangeNewCorpusNameInput inputText ->
+    Msgs.ChangeNewCorpusNameInput inputText ->
       let
         corpus =
           model.newCorpus
@@ -131,24 +115,24 @@ update msg model =
       in
         (newModel, Cmd.none)
 
-    SubmitCorpus ->
+    Msgs.SubmitCorpus ->
       (model, submitCorpus model)
 
-    ClearCorpus ->
+    Msgs.ClearCorpus ->
       let newModel =
         { model | newCorpus = Corpus Nothing "" ""}
 
       in
         (newModel, Cmd.none)
 
-    NewCorpus (Ok results) ->
+    Msgs.NewCorpus (Ok results) ->
       let newModel =
         { model | corpora = results :: model.corpora }
 
       in
         (newModel, Cmd.none)
 
-    NewCorpus (Err error) ->
+    Msgs.NewCorpus (Err error) ->
       Debug.crash("error: " ++ (toString error))
 
       (model, Cmd.none)
@@ -159,7 +143,7 @@ view model =
   div []
     [ viewSprintName model
     , viewSprintNameButtons
-    , viewCorpora model
+    , selectCorpora model.corpora
     , viewNewCorpusNameInput
     , viewNewCorpusTextInput
     , viewNewCorpusSubmitButtons
@@ -175,30 +159,16 @@ viewSprintName model =
 viewSprintNameButtons : Html Msg
 viewSprintNameButtons =
   div []
-    [ button [ onClick GetSprintName ] [ text "Get Sprint Name" ]
-    , button [ onClick ClearSprintName ] [ text "Clear" ]
+    [ button [ onClick Msgs.GetSprintName ] [ text "Get Sprint Name" ]
+    , button [ onClick Msgs.ClearSprintName ] [ text "Clear" ]
     ]
-
-viewCorpora : Model -> Html Msg
-viewCorpora model =
-  div []
-    [ label []
-      [ select [ onInput ChooseCorpora ] (viewSelectCorpora model)
-      , text "Choose Corpora"
-      ]
-    ]
-
-viewSelectCorpora : Model -> List (Html Msg)
-viewSelectCorpora model =
-  (List.map (\corpora -> option [value (toString corpora.id)] [text corpora.name])
-    model.corpora)
 
 viewNewCorpusNameInput : Html Msg
 viewNewCorpusNameInput =
   div []
     [ input
       [ placeholder "New Corpus Name"
-      , onInput ChangeNewCorpusNameInput
+      , onInput Msgs.ChangeNewCorpusNameInput
       ]
       []
     ]
@@ -208,7 +178,7 @@ viewNewCorpusTextInput =
   div []
     [ input
       [ placeholder "New Corpus Text"
-      , onInput ChangeNewCorpusTextInput
+      , onInput Msgs.ChangeNewCorpusTextInput
       ]
       []
     ]
@@ -216,46 +186,13 @@ viewNewCorpusTextInput =
 viewNewCorpusSubmitButtons : Html Msg
 viewNewCorpusSubmitButtons =
   div []
-    [ button [ onClick SubmitCorpus ] [ text "Submit Corpus" ]
-    , button [ onClick ClearCorpus ] [ text "Clear Corpus" ]
+    [ button [ onClick Msgs.SubmitCorpus ] [ text "Submit Corpus" ]
+    , button [ onClick Msgs.ClearCorpus ] [ text "Clear Corpus" ]
     ]
 
 viewErrors : Model -> Html Msg
 viewErrors model =
   div [] [ text model.errorMessage ]
-
--- DECODERS
-type alias GetSprintNameResults =
-  { sprint_name : List String }
-
-decodeSprintName : Decode.Decoder GetSprintNameResults
-decodeSprintName =
-  Decode.map
-    GetSprintNameResults
-    (Decode.at ["sprint_name"] (Decode.list Decode.string))
-
-encodeCorpus : Model -> Http.Body
-encodeCorpus model =
-  Http.jsonBody
-    <| Encode.object
-      [
-        ("corpus", Encode.object
-          [ ("text", Encode.string model.newCorpus.text)
-          , ("name", Encode.string model.newCorpus.name)
-          ]
-        )
-      ]
-
-decodeCorpus : Decode.Decoder Corpus
-decodeCorpus =
-  Decode.map3 Corpus
-    (Decode.maybe <| Decode.field "id" Decode.int)
-    (Decode.field "name" Decode.string)
-    (Decode.field "text" Decode.string)
-
-decodeCorpora : Decode.Decoder Corpora
-decodeCorpora =
-  Decode.list decodeCorpus
 
 -- HTTP
 getSprintName : Cmd Msg
@@ -263,18 +200,18 @@ getSprintName =
   let url =
     "http://localhost:4000/corpora/3/sprint-name"
   in
-    Http.send NewSprintName (Http.get url decodeSprintName)
+    Http.send Msgs.NewSprintName (Http.get url decodeSprintName)
 
 getCorpora : Cmd Msg
 getCorpora =
   let url =
     "http://localhost:4000/corpora"
   in
-    Http.send GetCorpora (Http.get url decodeCorpora)
+    Http.send Msgs.GetCorpora (Http.get url decodeCorpora)
 
 submitCorpus : Model -> Cmd Msg
 submitCorpus model =
   let url =
     "http://localhost:4000/corpora"
   in
-    Http.send NewCorpus (Http.post url (encodeCorpus model) decodeCorpus)
+    Http.send Msgs.NewCorpus (Http.post url (encodeCorpus model.newCorpus) decodeCorpus)
