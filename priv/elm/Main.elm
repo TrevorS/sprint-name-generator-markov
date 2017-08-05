@@ -1,13 +1,12 @@
-import Html exposing (Html, button, div, input, select, option, text, label, ul, li, span)
+import Html exposing (Html, button, div, input, text, ul, li)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
-import Http
 
+import Model exposing (Model, model)
 import Corpus exposing (Corpus)
-import Corpora exposing (Corpora)
 import SelectCorpora exposing (selectCorpora)
 import Msgs exposing (Msg)
-import Decoders exposing (..)
+import Server exposing (..)
 
 main : Program Never Model Msg
 main =
@@ -24,19 +23,6 @@ init =
   ( model
   , Cmd.batch([(getSprintName "3"), getCorpora])
   )
-
--- MODEL
-type alias Model =
-  { sprintName : List String
-  , newCorpus : Corpus
-  , corpora: Corpora
-  , selectedCorpus: String
-  , errorMessage: String
-  }
-
-model : Model
-model =
-  Model [] (Corpus Nothing "" "") [] "" ""
 
 -- UPDATE
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -193,25 +179,3 @@ viewNewCorpusSubmitButtons =
 viewErrors : Model -> Html Msg
 viewErrors model =
   div [] [ text model.errorMessage ]
-
--- HTTP
-getSprintName : String -> Cmd Msg
-getSprintName corpusId =
-  let url =
-    "http://localhost:4000/corpora/" ++ corpusId ++ "/sprint-name"
-  in
-    Http.send Msgs.NewSprintName (Http.get url decodeSprintName)
-
-getCorpora : Cmd Msg
-getCorpora =
-  let url =
-    "http://localhost:4000/corpora"
-  in
-    Http.send Msgs.GetCorpora (Http.get url decodeCorpora)
-
-submitCorpus : Model -> Cmd Msg
-submitCorpus model =
-  let url =
-    "http://localhost:4000/corpora"
-  in
-    Http.send Msgs.NewCorpus (Http.post url (encodeCorpus model.newCorpus) decodeCorpus)
