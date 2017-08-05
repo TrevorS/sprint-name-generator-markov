@@ -22,7 +22,7 @@ main =
 init : (Model, Cmd Msg)
 init =
   ( model
-  , Cmd.batch([getSprintName, getCorpora])
+  , Cmd.batch([(getSprintName "3"), getCorpora])
   )
 
 -- MODEL
@@ -42,8 +42,8 @@ model =
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    Msgs.GetSprintName ->
-      (model, getSprintName)
+    Msgs.GetSprintName corpusId ->
+      (model, getSprintName corpusId)
 
     Msgs.ClearSprintName ->
       let newModel =
@@ -159,7 +159,7 @@ viewSprintName model =
 viewSprintNameButtons : Html Msg
 viewSprintNameButtons =
   div []
-    [ button [ onClick Msgs.GetSprintName ] [ text "Get Sprint Name" ]
+    [ button [ onClick (Msgs.GetSprintName "3") ] [ text "Get Sprint Name" ]
     , button [ onClick Msgs.ClearSprintName ] [ text "Clear" ]
     ]
 
@@ -195,10 +195,10 @@ viewErrors model =
   div [] [ text model.errorMessage ]
 
 -- HTTP
-getSprintName : Cmd Msg
-getSprintName =
+getSprintName : String -> Cmd Msg
+getSprintName corpusId =
   let url =
-    "http://localhost:4000/corpora/3/sprint-name"
+    "http://localhost:4000/corpora/" ++ corpusId ++ "/sprint-name"
   in
     Http.send Msgs.NewSprintName (Http.get url decodeSprintName)
 
