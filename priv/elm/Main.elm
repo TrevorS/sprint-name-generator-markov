@@ -21,13 +21,16 @@ main =
 init : (Model, Cmd Msg)
 init =
   ( model
-  , Cmd.batch([(getSprintName "3"), getCorpora])
+  , Cmd.batch([getRandomSprintName, getCorpora])
   )
 
 -- UPDATE
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
+    Msgs.GetRandomSprintName ->
+      (model, getRandomSprintName)
+
     Msgs.GetSprintName corpusId ->
       (model, getSprintName corpusId)
 
@@ -52,6 +55,13 @@ update msg model =
       in
         (newModel, Cmd.none)
 
+    Msgs.NewSprintName (Err _) ->
+      let newModel =
+        { model | errorMessage = "NewSprintName: Error" }
+
+      in
+        (newModel, Cmd.none)
+
     Msgs.GetCorpora (Ok results) ->
       let newModel =
         { model | corpora = results }
@@ -62,13 +72,6 @@ update msg model =
     Msgs.GetCorpora (Err _) ->
       let newModel =
         { model | errorMessage = "GetCorpora: Error" }
-
-      in
-        (newModel, Cmd.none)
-
-    Msgs.NewSprintName (Err _) ->
-      let newModel =
-        { model | errorMessage = "NewSprintName: Error" }
 
       in
         (newModel, Cmd.none)
@@ -127,25 +130,25 @@ update msg model =
 view : Model -> Html Msg
 view model =
   div []
-    [ viewSprintName model
-    , viewSprintNameButtons
+    [ viewSprintName model.sprintName
+    , viewSprintNameButtons model.selectedCorpus
     , selectCorpora model.corpora
     , viewNewCorpusNameInput
     , viewNewCorpusTextInput
     , viewNewCorpusSubmitButtons
-    , viewErrors model
+    , viewErrors model.errorMessage
     ]
 
-viewSprintName : Model -> Html Msg
-viewSprintName model =
+viewSprintName : List String -> Html Msg
+viewSprintName sprintName =
   ul []
     (List.map (\word -> li [] [ text word ])
-      model.sprintName)
+      sprintName)
 
-viewSprintNameButtons : Html Msg
-viewSprintNameButtons =
+viewSprintNameButtons : String -> Html Msg
+viewSprintNameButtons selectedCorpus =
   div []
-    [ button [ onClick (Msgs.GetSprintName "3") ] [ text "Get Sprint Name" ]
+    [ button [ onClick (Msgs.GetSprintName selectedCorpus) ] [ text "Get Sprint Name" ]
     , button [ onClick Msgs.ClearSprintName ] [ text "Clear" ]
     ]
 
@@ -176,6 +179,6 @@ viewNewCorpusSubmitButtons =
     , button [ onClick Msgs.ClearCorpus ] [ text "Clear Corpus" ]
     ]
 
-viewErrors : Model -> Html Msg
-viewErrors model =
-  div [] [ text model.errorMessage ]
+viewErrors : String -> Html Msg
+viewErrors errorMessage =
+  div [] [ text errorMessage ]

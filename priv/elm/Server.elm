@@ -6,6 +6,13 @@ import Model exposing (Model)
 import Msgs exposing (Msg)
 import Decoders exposing (..)
 
+getRandomSprintName : Cmd Msg
+getRandomSprintName =
+  let url =
+    "http://localhost:4000/sprint-name"
+  in
+    Http.send Msgs.NewSprintName (Http.get url decodeSprintName)
+
 getSprintName : String -> Cmd Msg
 getSprintName corpusId =
   let url =

@@ -7,7 +7,8 @@ import Corpora exposing (Corpora)
 import Decoders exposing (GetSprintNameResults)
 
 type Msg
-  = GetSprintName String
+  = GetRandomSprintName
+  | GetSprintName String
   | GetCorpora (Result Http.Error Corpora)
   | ClearSprintName
   | NewSprintName (Result Http.Error GetSprintNameResults)
