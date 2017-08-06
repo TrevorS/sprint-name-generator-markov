@@ -16,6 +16,9 @@ defmodule SprintNameGenerator.Router do
   plug :match
   plug :dispatch
 
+  forward "/sprint-name",
+    to: SprintName
+
   forward "/corpora/:id/sprint-name",
     to: SprintName
 
