@@ -1,4 +1,4 @@
-module Model exposing (Model, model)
+module Model exposing (Model, initialModel)
 
 import Corpus exposing (Corpus)
 import Corpora exposing (Corpora)
@@ -11,6 +11,6 @@ type alias Model =
   , errorMessage: String
   }
 
-model : Model
-model =
+initialModel : Model
+initialModel =
   Model [] (Corpus Nothing "" "") [] "" ""

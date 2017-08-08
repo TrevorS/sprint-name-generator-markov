@@ -1,12 +1,12 @@
 module View exposing (view)
 
 import Html exposing (Html, button, div, input, text, ul, li)
-import Html.Attributes exposing (..)
+import Html.Attributes exposing (placeholder)
 import Html.Events exposing (onClick, onInput)
 
-import Model exposing(Model)
+import Model exposing (Model)
 import Msgs exposing (Msg)
-import SelectCorpora exposing(selectCorpora)
+import SelectCorpora exposing (selectCorpora)
 
 view : Model -> Html Msg
 view model =
