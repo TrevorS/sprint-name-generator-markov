@@ -1,40 +1,71 @@
 module View exposing (view)
 
-import Html exposing (Html, button, div, input, text, ul, li)
-import Html.Attributes exposing (placeholder)
+import Html exposing (Html, h1, label, select, option, button, div, input, text, ul, li)
+import Html.Attributes exposing (placeholder, style, value)
 import Html.Events exposing (onClick, onInput)
 
 import Model exposing (Model)
 import Msgs exposing (Msg)
-import SelectCorpora exposing (selectCorpora)
+import Corpora exposing (Corpora)
+
+import Styles exposing (..)
 
 view : Model -> Html Msg
 view model =
-  div []
-    [ viewSprintName model.sprintName
-    , viewSprintNameButtons model.selectedCorpus
-    , selectCorpora model.corpora
-    , viewNewCorpusNameInput
-    , viewNewCorpusTextInput
-    , viewNewCorpusSubmitButtons
-    , viewErrors model.errorMessage
+  div [style viewStyles]
+    [ title
+    , sprintName model.sprintName
+    , getSprintName model.selectedCorpus model.corpora
+    , newCorpusNameInput
+    , newCorpusTextInput
+    , newCorpusSubmitButtons
+    , errors model.errorMessage
     ]
 
-viewSprintName : List String -> Html Msg
-viewSprintName sprintName =
-  ul []
-    (List.map (\word -> li [] [ text word ])
-      sprintName)
-
-viewSprintNameButtons : String -> Html Msg
-viewSprintNameButtons selectedCorpus =
+title : Html Msg
+title =
   div []
-    [ button [ onClick (Msgs.GetSprintName selectedCorpus) ] [ text "Get Sprint Name" ]
-    , button [ onClick Msgs.ClearSprintName ] [ text "Clear" ]
+    [h1 [style h1Styles] [text "Random Sprint Name Generator"]]
+
+sprintName : List String -> Html Msg
+sprintName sprintName =
+  div [style sprintNameStyles]
+    [ul []
+      (List.map (\word -> li [style liStyles] [ text word ])
+        sprintName)
     ]
 
-viewNewCorpusNameInput : Html Msg
-viewNewCorpusNameInput =
+getSprintName : String -> Corpora -> Html Msg
+getSprintName selectedCorpus corpora =
+  div [style getSprintNameStyles]
+    [ selectCorpora corpora
+    , getSprintNameButton selectedCorpus
+    ]
+
+getSprintNameButton : String -> Html Msg
+getSprintNameButton selectedCorpus =
+  button [ style buttonStyles, onClick (Msgs.GetSprintName selectedCorpus) ] [ text "Get Sprint Name" ]
+
+selectCorpora : Corpora -> Html Msg
+selectCorpora corpora =
+  select [ style selectCorporaStyles, onInput Msgs.CorporaSelected ] (selectCorporaOptions corpora)
+
+selectCorporaOptions : Corpora -> List (Html Msg)
+selectCorporaOptions corpora =
+  (List.map (\corpus -> option [style selectCorporaOptionStyles, value (idToString corpus.id)] [text corpus.name])
+    corpora)
+
+idToString : Maybe Int -> String
+idToString id =
+  case id of
+    Just value ->
+      toString value
+
+    Nothing ->
+      Debug.crash "selectCorpora: received Corpus without `id`."
+
+newCorpusNameInput : Html Msg
+newCorpusNameInput =
   div []
     [ input
       [ placeholder "New Corpus Name"
@@ -43,8 +74,8 @@ viewNewCorpusNameInput =
       []
     ]
 
-viewNewCorpusTextInput : Html Msg
-viewNewCorpusTextInput =
+newCorpusTextInput : Html Msg
+newCorpusTextInput =
   div []
     [ input
       [ placeholder "New Corpus Text"
@@ -53,13 +84,13 @@ viewNewCorpusTextInput =
       []
     ]
 
-viewNewCorpusSubmitButtons : Html Msg
-viewNewCorpusSubmitButtons =
+newCorpusSubmitButtons : Html Msg
+newCorpusSubmitButtons =
   div []
     [ button [ onClick Msgs.SubmitCorpus ] [ text "Submit Corpus" ]
     , button [ onClick Msgs.ClearCorpus ] [ text "Clear Corpus" ]
     ]
 
-viewErrors : String -> Html Msg
-viewErrors errorMessage =
+errors : String -> Html Msg
+errors errorMessage =
   div [] [ text errorMessage ]

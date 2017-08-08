@@ -5,7 +5,7 @@ import Http
 import Model exposing (Model)
 import Corpus exposing (Corpus)
 import Corpora exposing (Corpora)
-import Decoders exposing (GetSprintNameResults, decodeSprintName, decodeCorpora, decodeCorpus ,encodeCorpus)
+import Decoders exposing (GetSprintNameResults, decodeSprintName, decodeCorpora, decodeCorpus, encodeCorpus)
 
 type Msg
   = GetRandomSprintName
