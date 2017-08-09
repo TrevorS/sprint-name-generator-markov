@@ -12,14 +12,15 @@ import Styles exposing (..)
 
 view : Model -> Html Msg
 view model =
-  div [style viewStyles]
+  div [style viewStyles] [container model]
+
+container : Model -> Html Msg
+container model =
+  div [style containerStyles]
     [ title
     , sprintName model.sprintName
     , getSprintName model.selectedCorpus model.corpora
-    , newCorpusNameInput
-    , newCorpusTextInput
-    , newCorpusSubmitButtons
-    , errors model.errorMessage
+    , newCorpusContainer model.showNewCorpusContainer model.errorMessage
     ]
 
 title : Html Msg
@@ -63,6 +64,15 @@ idToString id =
 
     Nothing ->
       Debug.crash "selectCorpora: received Corpus without `id`."
+
+newCorpusContainer : Bool -> String -> Html Msg
+newCorpusContainer showNewCorpusContainer errorMessage =
+  div [style (newCorpusContainerStyles showNewCorpusContainer)]
+    [ newCorpusNameInput
+    , newCorpusTextInput
+    , newCorpusSubmitButtons
+    , errors errorMessage
+    ]
 
 newCorpusNameInput : Html Msg
 newCorpusNameInput =

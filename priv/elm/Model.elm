@@ -9,8 +9,9 @@ type alias Model =
   , corpora: Corpora
   , selectedCorpus: String
   , errorMessage: String
+  , showNewCorpusContainer : Bool
   }
 
 initialModel : Model
 initialModel =
-  Model [] (Corpus Nothing "" "") [] "" ""
+  Model [] (Corpus Nothing "" "") [] "" "" False

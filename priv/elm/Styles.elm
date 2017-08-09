@@ -10,6 +10,13 @@ viewStyles =
   , ("background-color", "#E4DEE8")
   ]
 
+containerStyles: Styles
+containerStyles =
+  [ ("margin", "auto")
+  , ("padding-top", "40px")
+  , ("max-width", "650px")
+  ]
+
 h1Styles : Styles
 h1Styles =
   [ ("font-size", "40px")
@@ -24,7 +31,8 @@ sprintNameStyles: Styles
 sprintNameStyles =
   [ ("font-size", "30px")
   , ("text-align", "right")
-  , ("padding-right", "40px")
+  , ("padding-right", "10px")
+  , ("text-transform", "lowercase")
   ]
 
 liStyles : Styles
@@ -37,7 +45,7 @@ liStyles =
 getSprintNameStyles : Styles
 getSprintNameStyles =
   [ ("text-align", "right")
-  , ("padding-right", "60px")
+  , ("padding-right", "30px")
   ]
 
 buttonStyles : Styles
@@ -65,3 +73,12 @@ selectCorporaOptionStyles : Styles
 selectCorporaOptionStyles =
   [ ("direction", "rtl")
   ]
+
+newCorpusContainerStyles : Bool -> Styles
+newCorpusContainerStyles showNewCorpusContainer =
+  case showNewCorpusContainer of
+      True ->
+        [("display", "unset")]
+
+      False ->
+        [("display", "none")]
