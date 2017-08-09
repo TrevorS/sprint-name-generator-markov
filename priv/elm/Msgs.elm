@@ -66,8 +66,23 @@ update msg model =
         (newModel, Cmd.none)
 
     GetCorpora (Ok results) ->
-      let newModel =
-        { model | corpora = results }
+      let
+        firstId =
+          case List.head results of
+              Just corpus ->
+
+                case corpus.id of
+                  Just id ->
+                    toString id
+
+                  Nothing ->
+                    Debug.crash("Unable to set firstId.")
+
+              Nothing ->
+                Debug.crash("Unable to set firstId.")
+
+        newModel =
+          { model | corpora = results, selectedCorpus = firstId }
 
       in
         (newModel, Cmd.none)
