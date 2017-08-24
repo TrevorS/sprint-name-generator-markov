@@ -3,14 +3,17 @@ defmodule SprintNameGenerator.Endpoint do
 
   alias Plug.Adapters.Cowboy
 
+  alias SprintNameGenerator.Plug.IndexHtml
   alias SprintNameGenerator.Response
   alias SprintNameGenerator.Response.NotFound
 
   @opts [port: System.get_env("PORT") || 4000]
 
+  plug IndexHtml
+
   plug Plug.Static,
     at: "/", from: :sprint_name_generator, gzip: false,
-    only: ~w(css fonts images js favicon.ico robots.txt)
+    only: ~w(favicon.ico robots.txt index.html)
 
   plug Plug.Logger
 

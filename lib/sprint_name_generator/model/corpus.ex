@@ -14,6 +14,10 @@ defmodule SprintNameGenerator.Model.Corpus do
     timestamps()
   end
 
+  def find_random do
+    from Corpus, order_by: fragment("RANDOM()"), limit: 1
+  end
+
   def find_by_id(id) do
     from Corpus, where: [id: ^id]
   end

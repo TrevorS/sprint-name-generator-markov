@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "watch": "chokidar 'priv/elm/**/*.elm' -c 'elm make priv/elm/Main.elm --output priv/static/index.html' --initial"
+  },
+  "dependencies": {
+    "chokidar-cli": "^1.2.0"
+  }
+}

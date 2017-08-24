@@ -11,4 +11,10 @@ defmodule SprintNameGenerator.Endpoint.SprintName do
 
     send_resp(conn, status_code, message)
   end
+
+  def call(%{method: "GET"} = conn, _opts) do
+    %Response{status_code: status_code, message: message} = SprintName.build()
+
+    send_resp(conn, status_code, message)
+  end
 end

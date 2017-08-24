@@ -14,4 +14,15 @@ defmodule SprintNameGenerator.Response.SprintName do
 
     %Response{status_code: :ok, message: message}
   end
+
+  def build do
+    sprint_name =
+      Corpus.find_random
+      |> Repo.one
+      |> Markov.generate_sentence
+
+    message = Poison.encode!(%{sprint_name: sprint_name})
+
+    %Response{status_code: :ok, message: message}
+  end
 end
